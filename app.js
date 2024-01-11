@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config()
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser')
 const functions  = require('./functions');
 
 main().catch((err) => {console.log(err)})
@@ -12,8 +13,10 @@ async function main() {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+app.use(cookieParser());
 
 app.post('/api/signup', functions.sign_up);
+app.post('/api/login' , functions.login);
 
 
 // ERROR HANDLING
