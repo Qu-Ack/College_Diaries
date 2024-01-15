@@ -1,9 +1,9 @@
-const User = require('./Schemas/User')
-const asyncHandler = require('express-async-handler')
+const User = require('./Schemas/User');
+const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
-require('dotenv').config()
+require('dotenv').config();
 
 exports.sign_up = [
     body("name").trim().escape().isLength({ min: 3 }).withMessage("Name is too short should be atleast 3 characters long"),
@@ -36,7 +36,7 @@ exports.sign_up = [
         })
 
         if (errors.isEmpty()) {
-            bcrypt.hash(process.env.SECRET_PWD_HASH, 10, async (err, hash) => {
+            bcrypt.hash(req.body.password, 10, async (err, hash) => {
                 if (err) {
                     console.log(err)
                 } else {
@@ -56,37 +56,66 @@ exports.sign_up = [
     })
 ]
 
-
 exports.login = [
     body("email").trim().escape().isEmail().withMessage("should be a valid email"),
 
     asyncHandler(async (req, res, next) => {
-        const errors = validationResult(req)
+        const errors = validationResult(req);
 
-        if (errors.isEmpty()) {
-            User.findOne({ email: req.body.email }).then(user => {
-                bcrypt.compare(process.env.SECRET_PWD_HASH, user.password).then(match => {
-                    if (match) {
-                        const token = jwt.sign({email: req.body.email, password: req.body.password}, process.env.TOKEN_SECRET);
-                        res.cookie("access_token", token)
-                        res.status(200).json({
-                            status:"Logged In",
-                        })
-                    } else {
-                        res.status(400).json({
-                            status: "Bad password"
-                        })
-                    }
-                }).catch(err => {
-                    next(err)
-                })
-            }).catch(err => {
-                next(err)
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array()
+            });
+        }
+
+        const { password } = req.body;
+        try {
+            const user = await User.findOne({ email: req.body.email });
+
+            if (!user) {
+                return res.status(400).json({
+                    status: "User not found"
+                });
+            }
+            const match = await bcrypt.compare(password, user.password);
+
+            if (!match) {
+                return res.status(400).json({
+                    status: "Bad password"
+                });
+            }
+            const token = jwt.sign({email:req.body.email , password: user.password, master:user.master}, process.env.TOKEN_SECRET);
+            res.cookie("access-token", token);
+            res.status(200).json({
+                token,
+                status:"Logged In"
             })
-        } else {
-            res.json({
-                errors: errors
-            })
+        } catch (err) {
+            console.error(err);
+            next(err);
         }
     })
-] 
+];
+
+
+
+exports.verifyToken = async function(req,res,next) {
+    let cookie = req.headers.cookie;
+    let jwttoken = cookie.split('=')[1];
+    if (typeof cookie !== undefined) {
+        jwt.verify(jwttoken, process.env.TOKEN_SECRET , (err, decodedData) => {
+            if (err) {
+                res.status(403).json({
+                    status:"access denied"
+                })
+            }
+            req.user = decodedData;
+            // console.log(req) 
+            next();
+        }) 
+    } else {
+        res.status(403).json({
+            status:"Forbidden"
+        })
+    }
+}
