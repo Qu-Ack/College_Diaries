@@ -17,7 +17,10 @@ app.use(cookieParser());
 
 app.post('/api/signup', functions.sign_up);
 app.post('/api/login' ,  functions.login);
-
+app.post('/api/blog' ,functions.verifyToken, functions.createBlog)
+app.get('/api/blog', functions.getBlogs);
+app.post('/api/comment', functions.verifyToken, functions.postComments);
+app.get('/api/comment', functions.verifyToken, functions.getCommments)
 
 
 // ERROR HANDLING

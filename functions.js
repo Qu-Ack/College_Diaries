@@ -1,4 +1,6 @@
 const User = require('./Schemas/User');
+const Comment = require('./Schemas/Comment')
+const Blog = require('./Schemas/Blog');
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -84,11 +86,11 @@ exports.login = [
                     status: "Bad password"
                 });
             }
-            const token = jwt.sign({email:req.body.email , password: user.password, master:user.master}, process.env.TOKEN_SECRET);
+            const token = jwt.sign({ email: req.body.email, password: user.password, master: user.master , symbol: user._id}, process.env.TOKEN_SECRET);
             res.cookie("access-token", token);
             res.status(200).json({
                 token,
-                status:"Logged In"
+                status: "Logged In"
             })
         } catch (err) {
             console.error(err);
@@ -99,23 +101,122 @@ exports.login = [
 
 
 
-exports.verifyToken = async function(req,res,next) {
+exports.verifyToken = async function (req, res, next) {
     let cookie = req.headers.cookie;
-    let jwttoken = cookie.split('=')[1];
-    if (typeof cookie !== undefined) {
-        jwt.verify(jwttoken, process.env.TOKEN_SECRET , (err, decodedData) => {
+    if (typeof cookie !== 'undefined') {
+        let jwttoken = cookie.split('=')[1];
+        jwt.verify(jwttoken, process.env.TOKEN_SECRET, (err, decodedData) => {
             if (err) {
                 res.status(403).json({
-                    status:"access denied"
+                    status: "access denied"
                 })
             }
             req.user = decodedData;
             // console.log(req) 
             next();
-        }) 
+        })
     } else {
         res.status(403).json({
-            status:"Forbidden"
+            status: "Forbidden"
         })
     }
 }
+
+
+
+exports.createBlog = [
+    body('heading').trim().escape(),
+    body('text').trim(),
+    body('author').trim().escape(),
+
+
+
+    asyncHandler(async function (req, res, next) {
+        const errors = validationResult(req);
+
+        const blog = new Blog({
+            heading: req.body.heading,
+            text: req.body.text,
+            author: req.body.author,
+        })
+
+
+        if (!errors.isEmpty()) {
+            res.status(200).json({
+                errors: errors.array(),
+                blog,
+            })
+        } else {
+            if (typeof req.user == undefined) {
+                res.status(401).json({
+                    status: "Master is not logged in"
+                })
+            } else {
+                if (req.user.master == 'true') {
+                    await blog.save();
+                    res.status(201).json({
+                        status: "Blog created Successfully"
+                    })
+                } else {
+                    res.status(401).json({
+                        status:"Master is not logged in"
+                    })
+                }
+
+            }
+        }
+    })
+]
+
+
+exports.getBlogs = asyncHandler(async function(req,res,next) {
+    const blogs = await Blog.find({}).exec();
+    res.status(200).json({
+        blogs,
+    })
+})
+
+exports.postComments = [
+    body('content').trim().escape().isLength({min: 2}),
+
+    asyncHandler(async function(req,res,next) {
+        const errors = validationResult(req);
+
+        if (typeof req.user == 'undefined') {
+            res.status(401).json({
+                status: "Forbidden"
+            })
+        }
+        
+        let comment = new Comment({
+            content:req.body.content,
+            user: req.user.symbol,
+        })
+        if (!errors.isEmpty()) {
+            res.status(200).json({
+                errors:errors.array(),
+                comment: comment
+            })
+        } else {
+            await comment.save();
+            res.status(201).json({
+                status:"Comment posted succesfully"
+            })
+        }
+    })
+]
+
+
+exports.getCommments = asyncHandler(async function(req,res,next) {
+    if (typeof req.user == 'undefined') {
+        res.status(401).json({
+            status:"Forbidden"
+        })
+    }
+
+    const comments = await Comment.find({}).populate('user').exec();
+    res.status(200).json({
+        status:"success",
+        comments,
+    })
+})
