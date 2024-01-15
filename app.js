@@ -48,5 +48,5 @@ app.use((request,response, next) => {
 })
 
 
-app.listen(3000, () => {console.log("server on ....")});
+app.listen(process.env.PORT || 3000, '0.0.0.0',  () => {console.log("server on ....")});
 
