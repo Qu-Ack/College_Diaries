@@ -16,6 +16,9 @@ app.use(express.urlencoded({extended:true}))
 app.use(cookieParser());
 app.use(cors());
 
+app.get('/', (req,res,next) => {
+    res.send("Hello from the api")
+})
 app.post('/api/signup', functions.sign_up);
 app.post('/api/login' ,  functions.login);
 app.post('/api/blog' ,functions.verifyToken, functions.createBlog)
