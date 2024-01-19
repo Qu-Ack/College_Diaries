@@ -86,7 +86,7 @@ exports.login = [
                     status: "Bad password"
                 });
             }
-            const token = jwt.sign({ email: req.body.email, password: user.password, master: user.master , symbol: user._id}, process.env.TOKEN_SECRET);
+            const token = jwt.sign({ email: req.body.email, password: user.password, master: user.master , symbol: user._id, name:user.name}, process.env.TOKEN_SECRET);
             res.cookie("access-token", token);
             res.status(200).json({
                 token,
