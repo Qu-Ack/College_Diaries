@@ -75,14 +75,14 @@ exports.login = [
             const user = await User.findOne({ email: req.body.email });
 
             if (!user) {
-                return res.status(400).json({
+                return res.status(200).json({
                     status: "User not found"
                 });
             }
             const match = await bcrypt.compare(password, user.password);
 
             if (!match) {
-                return res.status(400).json({
+                return res.status(200).json({
                     status: "Bad password"
                 });
             }
