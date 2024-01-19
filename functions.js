@@ -65,7 +65,7 @@ exports.login = [
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.status(400).json({
+            return res.status(200).json({
                 errors: errors,
             });
         }
