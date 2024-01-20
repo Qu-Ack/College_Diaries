@@ -103,7 +103,7 @@ exports.login = [
 
 exports.verifyToken = async function (req, res, next) {
     const authHeader = req.headers['Authorization']
-    if (authHeader) {
+    if (typeof authHeader != 'undefined') {
         const token = authHeader.split(' ')[1];
 
         jwt.verify(token, accessTokenSecret, (err, user) => {
