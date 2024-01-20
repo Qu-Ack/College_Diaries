@@ -103,7 +103,6 @@ exports.login = [
 
 exports.verifyToken = async function (req, res, next) {
     const authHeader = req.headers.authorization;
-    res.send(authHeader)
     if (typeof authHeader != 'undefined') {
         const token = authHeader.split(' ')[1];
 
