@@ -115,7 +115,7 @@ exports.verifyToken = async function (req, res, next) {
             next();
         });
     } else {
-        res.sendStatus(401);
+        res.sendStatus(200);
     }
 }
 
