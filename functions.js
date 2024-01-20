@@ -115,7 +115,9 @@ exports.verifyToken = async function (req, res, next) {
             next();
         });
     } else {
-        res.sendStatus(200);
+        res.status(401).json({
+            status:"No Login Token provided"
+        })
     }
 }
 
