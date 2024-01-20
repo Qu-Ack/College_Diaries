@@ -102,23 +102,21 @@ exports.login = [
 
 
 exports.verifyToken = async function (req, res, next) {
-    let cookie = req.headers.cookie;
-    if (typeof cookie !== 'undefined') {
-        let jwttoken = cookie.split('=')[1];
-        jwt.verify(jwttoken, process.env.TOKEN_SECRET, (err, decodedData) => {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader) {
+        const token = authHeader.split(' ')[1];
+
+        jwt.verify(token, accessTokenSecret, (err, user) => {
             if (err) {
-                res.status(403).json({
-                    status: "access denied"
-                })
+                return res.sendStatus(403);
             }
-            req.user = decodedData;
-            // console.log(req) 
+
+            req.user = user;
             next();
-        })
+        });
     } else {
-        res.status(403).json({
-            status: "Forbidden"
-        })
+        res.sendStatus(401);
     }
 }
 
