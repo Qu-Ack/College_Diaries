@@ -107,7 +107,7 @@ exports.verifyToken = async function (req, res, next) {
     if (typeof authHeader != 'undefined') {
         const token = authHeader.split(' ')[1];
 
-        jwt.verify(token, accessTokenSecret, (err, user) => {
+        jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
             if (err) {
                 return res.sendStatus(403);
             }
