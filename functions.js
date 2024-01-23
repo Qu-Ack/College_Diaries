@@ -176,6 +176,14 @@ exports.getBlogs = asyncHandler(async function(req,res,next) {
     })
 })
 
+
+exports.getBlog = asyncHandler(async function(req,res,next) {
+    const blog = await Blog.findOne({_id:req.params.id}).exec();
+    res.status(200).json({
+        blog
+    })
+})
+
 exports.postComments = [
     body('content').trim().escape().isLength({min: 2}),
 
