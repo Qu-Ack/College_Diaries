@@ -231,8 +231,6 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
                     status:"Forbidden"
                 })
             }
-
-            req.user = user;
         });
     } else {
         res.status(401).json({
