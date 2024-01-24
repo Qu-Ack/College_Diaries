@@ -126,7 +126,7 @@ exports.verifyToken = async function (req, res, next) {
 
 exports.createBlog = [
     body('heading').trim().escape(),
-    body('text').trim(),
+    body('text'),
     body('author').trim().escape(),
 
 
