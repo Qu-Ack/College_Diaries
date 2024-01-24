@@ -227,13 +227,11 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
         } else {
             jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
                 if (err) {
-                    res.json({ status: "fuck you" })
                     res.status(401).json({
                         status: "Forbidden"
                     })
                 }
 
-                res.json({ status: "Token verified successfully" })
             });
         }
     } else {
