@@ -223,7 +223,9 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
         res.json({token})
         jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
             if (err) {
-                next();
+                res.status(401).json({
+                    status:"Forbidden"
+                })
             }
 
             req.user = user;
