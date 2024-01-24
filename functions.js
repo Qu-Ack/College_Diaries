@@ -231,8 +231,9 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
                 res.status(401).json({
                     status:"Forbidden"
                 })
-            } else {
-            }
+            } 
+
+            res.json({status:"Token verified successfully"})
         });
     } else {
         res.status(401).json({
