@@ -233,6 +233,12 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
                 }
 
             });
+            const comments = await Comment.find({ blog: req.params.id }).populate('user').exec();
+            res.status(200).json({
+                status: "success",
+                comments,
+                blog: req.middlewareData,
+            })
         }
     } else {
         res.status(401).json({
@@ -240,10 +246,5 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
         })
     } u
 
-    const comments = await Comment.find({ blog: req.params.id }).populate('user').exec();
-    res.status(200).json({
-        status: "success",
-        comments,
-        blog: req.middlewareData,
-    })
+
 })
