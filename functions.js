@@ -189,12 +189,6 @@ exports.postComments = [
     asyncHandler(async function (req, res, next) {
         const errors = validationResult(req);
 
-        if (typeof req.user == 'undefined') {
-            res.status(401).json({
-                status: "Forbidden"
-            })
-        }
-
         let comment = new Comment({
             content: req.body.content,
             user: req.user.symbol,
