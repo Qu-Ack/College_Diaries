@@ -191,8 +191,8 @@ exports.postComments = [
 
         let comment = new Comment({
             content: req.body.content,
-            user: req.user.symbol,
-            blog: req.params.id,
+            user: req.body.user,
+            blog: req.body.blog,
         })
         if (!errors.isEmpty()) {
             res.status(200).json({
