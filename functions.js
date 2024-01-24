@@ -222,24 +222,25 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
 
         if (token == 'undefined') {
             res.status(200).json({
-                blog:req.middlewareData,
+                blog: req.middlewareData,
             })
-        }
-        jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-            if (err) {
-                res.json({status:"fuck you"})
-                res.status(401).json({
-                    status:"Forbidden"
-                })
-            } 
+        } else {
+            jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+                if (err) {
+                    res.json({ status: "fuck you" })
+                    res.status(401).json({
+                        status: "Forbidden"
+                    })
+                }
 
-            res.json({status:"Token verified successfully"})
-        });
+                res.json({ status: "Token verified successfully" })
+            });
+        }
     } else {
         res.status(401).json({
             status: "No Login Token provided"
         })
-    }u
+    } u
 
     const comments = await Comment.find({ blog: req.params.id }).populate('user').exec();
     res.status(200).json({
