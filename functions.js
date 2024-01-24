@@ -179,9 +179,8 @@ exports.getBlogs = asyncHandler(async function(req,res,next) {
 
 exports.getBlog = asyncHandler(async function(req,res,next) {
     const blog = await Blog.findOne({_id:req.params.id}).exec();
-    res.status(200).json({
-        blog
-    })
+    req.middlewareData = blog;
+    next();
 })
 
 exports.postComments = [
@@ -199,6 +198,7 @@ exports.postComments = [
         let comment = new Comment({
             content:req.body.content,
             user: req.user.symbol,
+            blog: req.params.id,
         })
         if (!errors.isEmpty()) {
             res.status(200).json({
@@ -222,9 +222,10 @@ exports.getCommments = asyncHandler(async function(req,res,next) {
         })
     }
 
-    const comments = await Comment.find({}).populate('user').exec();
+    const comments = await Comment.find({blog: req.params.id}).populate('user').exec();
     res.status(200).json({
         status:"success",
         comments,
+        blog: req.middlewareData,
     })
 })
