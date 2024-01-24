@@ -244,7 +244,7 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
         res.status(401).json({
             status: "No Login Token provided"
         })
-    } u
+    } 
 
 
 })
