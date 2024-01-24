@@ -109,7 +109,7 @@ exports.verifyToken = async function (req, res, next) {
 
         jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
             if (err) {
-                return res.sendStatus(403);
+                next();
             }
 
             req.user = user;
@@ -217,8 +217,9 @@ exports.postComments = [
 
 exports.getCommments = asyncHandler(async function(req,res,next) {
     if (typeof req.user == 'undefined') {
-        res.status(401).json({
-            status:"Forbidden"
+        res.status(200).json({
+            blog:req.middlewareData,
+            status:"Log In to See Comments"
         })
     }
 
