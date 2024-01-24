@@ -86,7 +86,7 @@ exports.login = [
                     status: "Bad password"
                 });
             }
-            const token = jwt.sign({ email: req.body.email, password: user.password, master: user.master , symbol: user._id, name:user.name}, process.env.TOKEN_SECRET);
+            const token = jwt.sign({ email: req.body.email, password: user.password, master: user.master, symbol: user._id, name: user.name }, process.env.TOKEN_SECRET);
             res.cookie("access-token", token);
             res.status(200).json({
                 token,
@@ -117,7 +117,7 @@ exports.verifyToken = async function (req, res, next) {
         });
     } else {
         res.status(401).json({
-            status:"No Login Token provided"
+            status: "No Login Token provided"
         })
     }
 }
@@ -159,7 +159,7 @@ exports.createBlog = [
                     })
                 } else {
                     res.status(401).json({
-                        status:"Master is not logged in"
+                        status: "Master is not logged in"
                     })
                 }
 
@@ -169,7 +169,7 @@ exports.createBlog = [
 ]
 
 
-exports.getBlogs = asyncHandler(async function(req,res,next) {
+exports.getBlogs = asyncHandler(async function (req, res, next) {
     const blogs = await Blog.find({}).exec();
     res.status(200).json({
         blogs,
@@ -177,16 +177,16 @@ exports.getBlogs = asyncHandler(async function(req,res,next) {
 })
 
 
-exports.getBlog = asyncHandler(async function(req,res,next) {
-    const blog = await Blog.findOne({_id:req.params.id}).exec();
+exports.getBlog = asyncHandler(async function (req, res, next) {
+    const blog = await Blog.findOne({ _id: req.params.id }).exec();
     req.middlewareData = blog;
     next();
 })
 
 exports.postComments = [
-    body('content').trim().escape().isLength({min: 2}),
+    body('content').trim().escape().isLength({ min: 2 }),
 
-    asyncHandler(async function(req,res,next) {
+    asyncHandler(async function (req, res, next) {
         const errors = validationResult(req);
 
         if (typeof req.user == 'undefined') {
@@ -194,38 +194,54 @@ exports.postComments = [
                 status: "Forbidden"
             })
         }
-        
+
         let comment = new Comment({
-            content:req.body.content,
+            content: req.body.content,
             user: req.user.symbol,
             blog: req.params.id,
         })
         if (!errors.isEmpty()) {
             res.status(200).json({
-                errors:errors.array(),
+                errors: errors.array(),
                 comment: comment
             })
         } else {
             await comment.save();
             res.status(201).json({
-                status:"Comment posted succesfully"
+                status: "Comment posted succesfully"
             })
         }
     })
 ]
 
 
-exports.getCommments = asyncHandler(async function(req,res,next) {
-    if (typeof req.user == 'undefined') {
-        res.status(200).json({
-            blog:req.middlewareData,
-            status:"Log In to See Comments"
-        })
-    }
+exports.getCommments = asyncHandler(async function (req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (typeof authHeader != 'undefined') {
+        const token = authHeader.split(' ')[1];
 
-    const comments = await Comment.find({blog: req.params.id}).populate('user').exec();
+        if (typeof token == 'undefined') {
+            res.status(200).json({
+                blog:req.middlewareData,
+                status:"Login to see the comments"
+            })
+        }
+        jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+            if (err) {
+                next();
+            }
+
+            req.user = user;
+        });
+    } else {
+        res.status(401).json({
+            status: "No Login Token provided"
+        })
+    }u
+
+    const comments = await Comment.find({ blog: req.params.id }).populate('user').exec();
     res.status(200).json({
-        status:"success",
+        status: "success",
         comments,
         blog: req.middlewareData,
     })
