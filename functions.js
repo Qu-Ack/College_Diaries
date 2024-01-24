@@ -220,12 +220,7 @@ exports.getCommments = asyncHandler(async function (req, res, next) {
     if (typeof authHeader != 'undefined') {
         const token = authHeader.split(' ')[1];
 
-        if (typeof token == 'undefined') {
-            res.status(200).json({
-                blog:req.middlewareData,
-                status:"Login to see the comments"
-            })
-        }
+        res.json({token})
         jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
             if (err) {
                 next();
